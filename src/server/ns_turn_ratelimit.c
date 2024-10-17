@@ -35,6 +35,7 @@
 /////////////////// rate limit //////////////////////////
 
 ur_addr_map *rate_limit_map = NULL;
+int ratelimit_window_secs = RATELIMIT_DEFAULT_WINDOW_SECS;
 TURN_MUTEX_DECLARE(rate_limit_main_mutex);
 
 void ratelimit_add_node(ioa_addr *address) {
@@ -50,7 +51,7 @@ void ratelimit_add_node(ioa_addr *address) {
 int ratelimit_delete_expired(ur_map_value_type value) {
   time_t current_time = time(NULL);
   ratelimit_entry *rateLimitEntry = (ratelimit_entry*)(void*)(ur_map_value_type)value;
-  if (rateLimitEntry->last_request_time + RATE_LIMIT_WINDOW_SECS < current_time)
+  if (rateLimitEntry->last_request_time + RATELIMIT_DEFAULT_WINDOW_SECS < current_time)
     return 1;
   return 0;
 }
@@ -64,7 +65,7 @@ void ratelimit_init_map() {
   TURN_MUTEX_UNLOCK(&rate_limit_main_mutex);
 }
 
-int ratelimit_is_address_limited(ioa_addr *address) {
+int ratelimit_is_address_limited(ioa_addr *address, int max_requests, int window_seconds) {
   /* Housekeeping, prune the map when ADDR_MAP_SIZE is hit and delete expired items */
   time_t current_time = time(NULL);
 
@@ -74,6 +75,9 @@ int ratelimit_is_address_limited(ioa_addr *address) {
 
   if (ur_addr_map_num_elements(rate_limit_map) >= ADDR_MAP_SIZE) {
     TURN_MUTEX_LOCK(&rate_limit_main_mutex);
+    /* Set ratelimit_window_secs to grant access to our delete function */
+    ratelimit_window_secs = window_seconds;
+
     addr_list_foreach_del_condition(rate_limit_map, ratelimit_delete_expired);
     TURN_MUTEX_UNLOCK(&rate_limit_main_mutex);
   }
@@ -85,12 +89,12 @@ int ratelimit_is_address_limited(ioa_addr *address) {
     ratelimit_entry *rateLimitEntry = (ratelimit_entry *)(void *)(ur_map_value_type)ratelimit_ptr;
     TURN_MUTEX_LOCK(&(rateLimitEntry->mutex));
 
-    if (current_time - rateLimitEntry->last_request_time > RATE_LIMIT_WINDOW_SECS) {
+    if (current_time - rateLimitEntry->last_request_time > window_seconds) {
       /* Check if request is inside the ratelimit window; reset the count and request time */
       rateLimitEntry->request_count = 1;
       rateLimitEntry->last_request_time = current_time;
       returnValue = 0;
-    } else if (rateLimitEntry->request_count < RATE_LIMIT_MAX_REQUESTS_PER_WINDOW) {
+    } else if (rateLimitEntry->request_count < max_requests) {
       /* Check if request count is below requests per window; increment the count */
       if (rateLimitEntry->request_count < UINT32_MAX)
         rateLimitEntry->request_count++;

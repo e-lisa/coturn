@@ -627,7 +627,7 @@ static size_t addr_list_size(const addr_list_header *slh) {
   return 0;
 }
 
-static addr_elem *addr_list_get(addr_list_header *slh, const ioa_addr *key, int port) {
+static addr_elem *_addr_list_get(addr_list_header *slh, const ioa_addr *key, int port) {
 
   if (!slh || !key) {
     return NULL;
@@ -757,7 +757,7 @@ void ur_addr_map_clean(ur_addr_map *map) {
  * false - error
  * if the addr key exists, the value is updated.
  */
-int _ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value, int port) {
+bool _ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value, int port) {
 
   if (!ur_addr_map_valid(map))
     return false;
@@ -785,15 +785,15 @@ int _ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type val
 
 /**
  * @ret:
- * 0 - success
- * -1 - error
+ * true - success
+ * false - error
  * if the addr key exists, the value is updated.
  */
-int ur_addr_map_put_no_port(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value) {
+bool ur_addr_map_put_no_port(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value) {
   return _ur_addr_map_put(map, key, value, 0);
 }
 
-int ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value) {
+bool ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value) {
   return _ur_addr_map_put(map, key, value, 1);
 }
 
@@ -802,7 +802,7 @@ int ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type valu
  * 1 - success
  * 0 - not found
  */
-int _ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value, int port) {
+bool _ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value, int port) {
 
   if (!ur_addr_map_valid(map)) {
     return false;
@@ -837,11 +837,11 @@ int _ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_ty
  * 1 - success
  * 0 - not found
  */
-int ur_addr_map_get_no_port(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value) {
+bool ur_addr_map_get_no_port(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value) {
   return _ur_addr_map_get(map, key, value, 0);
 }
 
-int ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value) {
+bool ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value) {
   return _ur_addr_map_get(map, key, value, 1);
 }
 
@@ -850,7 +850,7 @@ int ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_typ
  * 1 - success
  * 0 - not found
  */
-int ur_addr_map_del(ur_addr_map *map, ioa_addr *key, ur_addr_map_func delfunc) {
+bool ur_addr_map_del(ur_addr_map *map, ioa_addr *key, ur_addr_map_func delfunc) {
 
   if (!ur_addr_map_valid(map))
     return false;

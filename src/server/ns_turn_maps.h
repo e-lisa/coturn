@@ -223,8 +223,8 @@ void ur_addr_map_clean(ur_addr_map *map);
  */
 bool _ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value, int port);
 
-int ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value);
-int ur_addr_map_put_no_port(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value);
+bool ur_addr_map_put(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value);
+bool ur_addr_map_put_no_port(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type value);
 
 /**
  * @ret:
@@ -232,8 +232,8 @@ int ur_addr_map_put_no_port(ur_addr_map *map, ioa_addr *key, ur_addr_map_value_t
  * false - not found
  */
 bool _ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value, int port);
-int ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value);
-int ur_addr_map_get_no_port(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value);
+bool ur_addr_map_get(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value);
+bool ur_addr_map_get_no_port(const ur_addr_map *map, ioa_addr *key, ur_addr_map_value_type *value);
 
 /**
  * @ret:
